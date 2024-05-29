@@ -1,0 +1,12 @@
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.AssemblyInfoInputs.cache
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.AssemblyInfo.cs
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.csproj.CoreCompileInputs.cache
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.sourcelink.json
+C:\projects\CLIBot\src\CLIBot.Domain\bin\Debug\net8.0\CLIBot.Domain.deps.json
+C:\projects\CLIBot\src\CLIBot.Domain\bin\Debug\net8.0\CLIBot.Domain.dll
+C:\projects\CLIBot\src\CLIBot.Domain\bin\Debug\net8.0\CLIBot.Domain.pdb
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.dll
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\refint\CLIBot.Domain.dll
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\CLIBot.Domain.pdb
+C:\projects\CLIBot\src\CLIBot.Domain\obj\Debug\net8.0\ref\CLIBot.Domain.dll
