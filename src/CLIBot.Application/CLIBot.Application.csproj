@@ -4,6 +4,10 @@
     <ProjectReference Include="..\CLIBot.Domain\CLIBot.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.13.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

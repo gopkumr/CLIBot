@@ -1,11 +1,19 @@
 namespace CLIBot.Domain.Abstractions;
 
-using System.Collections.Generic;
-using CLIBot.Domain.Abstractions;
+using System.ComponentModel;
+using Azure.Identity;
+using Microsoft.SemanticKernel;
 
-public class ResourceGroupCommand : ICommand
+public class ResourceGroupCommand() : BaseCommand(new DefaultAzureCredential())
 {
-    public required string Name { get; set;}
 
-    public required Dictionary<string, string> Parameters {get;set;}
+    [KernelFunction]
+    [Description("Gets the Identified of the resoure group.")]
+    public string GetResourceGroupId(
+        [Description("Name of the resource group")] string name){
+        var resourceGroup = ARMClient.GetDefaultSubscription().GetResourceGroup(name);
+
+        return resourceGroup?.Value?.Data?.Id??"Cannot find the resource";
+    }
+
 }

@@ -1,6 +1,0 @@
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.csproj.AssemblyReference.cache
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.GeneratedMSBuildEditorConfig.editorconfig
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.AssemblyInfoInputs.cache
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.AssemblyInfo.cs
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.csproj.CoreCompileInputs.cache
-C:\projects\CLIBot\src\CLIBot.Application\obj\Debug\net8.0\CLIBot.Application.sourcelink.json
