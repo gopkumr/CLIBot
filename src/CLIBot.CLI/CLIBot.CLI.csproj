@@ -5,7 +5,10 @@
   </ItemGroup>
 
     <ItemGroup>
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.13.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.15.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.15.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.15.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.15.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -13,6 +16,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>cf9cf810-05b7-4faa-a9b0-42c0714d7a4f</UserSecretsId>
   </PropertyGroup>
 
 </Project>

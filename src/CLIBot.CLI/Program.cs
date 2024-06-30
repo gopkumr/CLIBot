@@ -1,33 +1,53 @@
-﻿using Azure.Identity;
+﻿using System.Text;
+using Azure.Identity;
 using CLIBot.Domain.Abstractions;
 using Microsoft.SemanticKernel;
+using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.Extensions.DependencyInjection;
 
-
-var builder = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion("xxx", "xxxx", "xxxxx");
-//builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
-builder.Plugins.AddFromType<ResourceGroupCommand>();
-//builder.Plugins.AddFromPromptDirectory("./../../../Plugins/WriterPlugin");
-Kernel kernel = builder.Build();
-
-
-ChatHistory history = [];
-Console.Write("User > ");
-string? userInput;
-
-
-while ((userInput = Console.ReadLine()) != null)
+internal class Program
 {
-    // Get user input
-    Console.Write("User > ");
-    var request = Console.ReadLine();
+    private static async Task Main(string[] args)
+    {
+        var builder = Kernel.CreateBuilder()
+                            .AddAzureOpenAIChatCompletion(deploymentName: "AzureAI:DeploymentName", 
+                                                        endpoint: "AzureAI:APIEndpoint", 
+                                                        apiKey: "AzureAI:APIKey");
+        
+        //builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
+        builder.Plugins.AddFromType<ResourceGroupCommand>();
+        //builder.Plugins.AddFromPromptDirectory("./../../../Plugins/WriterPlugin");
+        Kernel kernel = builder.Build();
+       
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        var openAIPromptExecutionSettings = new OpenAIPromptExecutionSettings
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
 
-    // Get chat response
-    var poemResult = await kernel.InvokeAsync("ResourceGroupCommand", "GetResourceGroupId", new()
-{
-    { "name", request }
-});
-    Console.WriteLine(poemResult);
+        ChatHistory chatMessages = [];
+        while (true)
+        {
+            // Get user input
+            Console.Write("User > ");
+            var request = Console.ReadLine();
+            if (request == null) break;
 
+            chatMessages.AddUserMessage(request);
+
+            var result = await chatCompletionService.GetChatMessageContentAsync(
+                chatMessages,
+                executionSettings: openAIPromptExecutionSettings,
+                kernel: kernel);
+
+            if (result != null)
+            {
+                chatMessages.AddMessage(result.Role, result.ToString());
+                Console.WriteLine(result.ToString());
+            }
+        }
+    }
 }
