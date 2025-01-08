@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ServiceBusBot.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "azure \"login to tenant c123\""
+    }
+  }
+}
