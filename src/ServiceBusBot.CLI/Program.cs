@@ -31,7 +31,7 @@ while (message != "exit" && !string.IsNullOrEmpty(message))
     var response = await CliHelper.GetModelResponse(chatService, message);
     CliHelper.RenderHeader();
     CliHelper.AddBotResponseRowToTable(table, message, response?.Message);
-    CliHelper.AddUsageRowToTable(table, response?.Duration==TimeSpan.MinValue?"-": response?.Duration.ToString(), response?.TokenUsage);
+    CliHelper.AddUsageRowToTable(table, response?.TokenUsage);
     CliHelper.RerenderTable(table);
 
     message = message = CliHelper.PromptUserMessage();

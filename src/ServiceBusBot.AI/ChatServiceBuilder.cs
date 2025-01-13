@@ -29,9 +29,9 @@ namespace ServiceBusBot.AI
             return new ChatService(_chatClientBuilder.Build());
         }
 
-        public IChatService Build(IEnumerable<AITool> tools)
+        public IChatService Build(IEnumerable<AITool> tools, ChatToolMode chatToolMode)
         {
-            return new ChatService(_chatClientBuilder.Build(), tools);
+            return new ChatService(_chatClientBuilder.Build(), tools, chatToolMode);
         }
     }
 }

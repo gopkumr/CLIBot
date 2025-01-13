@@ -1,5 +1,4 @@
-﻿using Azure;
-using Azure.Messaging.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using ServiceBusBot.Domain.Model;
 using ServiceBusBot.Domain.Utils;
@@ -29,22 +28,51 @@ namespace ServiceBusBot.ServiceBus.Queue
             return new ActionResponse("Message sent successfully", true);
         }
 
-        public static async Task<ActionResponse> ReadNMessagesFromQueue(ServiceBusClient client, string queueName, int numberOfMessages = 1)
+        public static async Task<ActionResponse> ReadNMessagesFromQueue(ServiceBusClient client, string queueName, int numberOfMessages = 10)
         {
             ServiceBusReceiver receiver = client.CreateReceiver(queueName);
             var messages = await receiver.ReceiveMessagesAsync(numberOfMessages);
             var messagebody = messages.Select(m => m.Body.ToString());
 
             messages.ToList().ForEach(async message => await receiver.CompleteMessageAsync(message));
-            
+
             return new ActionResponse(Serialiser.SerialiseJson(messagebody), true);
         }
 
-        public static async Task<ActionResponse> PeekMessageFromQueue(ServiceBusClient client, string queueName, int numberOfMessages = 1)
+        public static async Task<ActionResponse> PeekMessagesFromQueue(ServiceBusClient client, string queueName, int numberOfMessages = 10)
         {
             ServiceBusReceiver receiver = client.CreateReceiver(queueName);
-            var message = await receiver.PeekMessageAsync();
-            return new ActionResponse(Serialiser.SerialiseJson(message.Body.ToString()), true);
+            var messages = await receiver.PeekMessagesAsync(numberOfMessages);
+            var messagebody = messages.Select(m => m.Body.ToString());
+            return new ActionResponse(Serialiser.SerialiseJson(messagebody), true);
+        }
+
+        public static async Task<ActionResponse> PeekMessagesFromDeadletterQueue(ServiceBusClient client, string queueName, int numberOfMessages = 10)
+        {
+            ServiceBusReceiver receiver = client.CreateReceiver(queueName, new ServiceBusReceiverOptions
+            {
+                SubQueue = SubQueue.DeadLetter
+            });
+
+            var messages = await receiver.PeekMessagesAsync(numberOfMessages);
+            var messagebody = messages.Select(m => new { SeqNo=m.SequenceNumber, Content = m.Body.ToString() });
+
+            return new ActionResponse(Serialiser.SerialiseJson(messagebody), true);
+        }
+
+        public static async Task<ActionResponse> RequeueFromDeadletter(ServiceBusClient client, string queueName, long sequenceNumber)
+        {
+            ServiceBusReceiver receiver = client.CreateReceiver(queueName, new ServiceBusReceiverOptions
+            {
+                SubQueue = SubQueue.DeadLetter
+            });
+
+            var message = await receiver.PeekMessageAsync(fromSequenceNumber: sequenceNumber);
+            ServiceBusSender sender = client.CreateSender(queueName);
+            await sender.SendMessageAsync(new ServiceBusMessage(message));
+            await receiver.CompleteMessageAsync(message);
+
+            return new ActionResponse("Message successfully requeued and removed from deadletter", true);
         }
     }
 }

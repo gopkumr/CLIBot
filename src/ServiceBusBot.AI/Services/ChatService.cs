@@ -1,9 +1,6 @@
-﻿using Azure;
-using Microsoft.Extensions.AI;
-using Microsoft.VisualBasic;
+﻿using Microsoft.Extensions.AI;
 using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.Domain.Model;
-using System.Text;
 
 namespace ServiceBusBot.AI.Services
 {
@@ -11,6 +8,7 @@ namespace ServiceBusBot.AI.Services
     {
         private readonly IChatClient _chatClient;
         private readonly IEnumerable<AITool>? _tools;
+        private readonly ChatToolMode _mode = ChatToolMode.Auto;            
 
         private List<ChatMessage> conversation =
                 [
@@ -18,10 +16,11 @@ namespace ServiceBusBot.AI.Services
                     new(ChatRole.System, "Don't make assumptions about what values to use with functions. Ask for clarification if a user request is ambiguous.")
                ];
 
-        internal ChatService(IChatClient chatClient, IEnumerable<AITool> tools)
+        internal ChatService(IChatClient chatClient, IEnumerable<AITool> tools, ChatToolMode chatToolMode)
         {
             _chatClient = chatClient;
             _tools = tools;
+            _mode = chatToolMode;
         }
 
         internal ChatService(IChatClient chatClient)
@@ -34,7 +33,7 @@ namespace ServiceBusBot.AI.Services
             var chatOptions = new ChatOptions
             {
                 Tools = _tools?.ToList(),
-                ToolMode = ChatToolMode.RequireAny
+                ToolMode = _mode,
             };
 
             CondenseChatHistory();
@@ -45,9 +44,9 @@ namespace ServiceBusBot.AI.Services
 
             conversation.Add(new ChatMessage(ChatRole.Assistant, response.Message.Text));
 
-            return new ModelResponse(response?.Message?.Text??string.Empty, 
-                                    TimeSpan.Parse(response?.AdditionalProperties?["total_duration"]?.ToString()??TimeSpan.MinValue.ToString()), 
-                                    response?.Usage?.TotalTokenCount??000);
+            return new ModelResponse(response?.Message?.Text ?? string.Empty,
+                                    TimeSpan.Parse(response?.AdditionalProperties?["total_duration"]?.ToString() ?? TimeSpan.MinValue.ToString()),
+                                    response?.Usage?.TotalTokenCount ?? 000);
         }
 
         private void CondenseChatHistory()

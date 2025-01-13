@@ -9,13 +9,13 @@ using ServiceBusBot.ServiceBus.Queue;
 
 namespace ServiceBusBot.ServiceBus
 {
-    public class ServiceBusMediator : IAsyncDisposable, ITool
+    public class ServiceBusOrchastrator : IAsyncDisposable, ITool
     {
         ServiceBusClient? _serviceBusClient;
         ServiceBusAdministrationClient? _serviceBusAdminClient;
 
         [ToolFunction(Description = "Connect to a service bus namespace for the passed name")]
-        public async Task<ActionResponse> Connect(string? namespaceName = null)
+        public async Task<ActionResponse> Connect(string namespaceName)
         {
             if (string.IsNullOrEmpty(namespaceName))
                 return new ActionResponse("Please provide a namespace name", false);
@@ -37,7 +37,7 @@ namespace ServiceBusBot.ServiceBus
         }
 
         [ToolFunction(Description = "Connect to a service bus namespace for the passed connection string")]
-        public async Task<ActionResponse> ConnectUsingConnectionString(string? connectionString = null)
+        public async Task<ActionResponse> ConnectUsingConnectionString(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
                 return new ActionResponse("Please provide a connection string", false);
@@ -58,7 +58,7 @@ namespace ServiceBusBot.ServiceBus
             return new ActionResponse("Connected successfully", true);
         }
 
-        [ToolFunction(Description = "Get the details of the connected service bus namespace")]
+        [ToolFunction(Description = "Get the details of the connected service bus namespace", ReturnDescription = "Returns the properties of namespace in Json Format. This method also can return errors while reading")]
         public async Task<ActionResponse> GetNamespaceDescription()
         {
             if (_serviceBusAdminClient == null)
@@ -74,7 +74,7 @@ namespace ServiceBusBot.ServiceBus
             }
         }
 
-        [ToolFunction(Description = "Create a new queue in the namespace with the passed name")]
+        [ToolFunction(Description = "Create a new queue in the namespace with the passed name", ReturnDescription = "Returns the properties of the new created queue in Json Format. This method also can return errors while reading")]
         public async Task<ActionResponse> CreateNewQueue(string name)
         {
             if (_serviceBusAdminClient == null)
@@ -93,8 +93,15 @@ namespace ServiceBusBot.ServiceBus
         [ToolFunction(Description = "Send a message to the queue")]
         public async Task<ActionResponse> SendMessageToQueue(string queueName, string content)
         {
+            var responseMessage = string.Empty;
             if (_serviceBusClient == null)
-                return new ActionResponse("ServiceBusClient is null, connect to the service bus before calling this method", false);
+                responseMessage = "ServiceBusClient is null, connect to the service bus before calling this method";
+
+            if (string.IsNullOrEmpty(content))
+                responseMessage = "Content is empty, please provide a content to send in the message";
+
+            if (!string.IsNullOrEmpty(responseMessage))
+                return new ActionResponse(responseMessage, false);
 
             try
             {
@@ -106,7 +113,7 @@ namespace ServiceBusBot.ServiceBus
             }
         }
 
-        [ToolFunction(Description = "Read and delete a number of messages from the queue, if no number is specified single message is read")]
+        [ToolFunction(Description = "Read and delete a number of messages from the queue, if no number is specified single message is read", ReturnDescription = "Returns the content of the message and deletes the message from the queue. This method also can return errors while reading.")]
         public async Task<ActionResponse> ReadMessagesFromQueue(string queueName, int numberOfMessages = 1)
         {
             if (_serviceBusClient == null)
@@ -122,7 +129,7 @@ namespace ServiceBusBot.ServiceBus
             }
         }
 
-        [ToolFunction(Description = "Peek the oldest message in queue. The message is not removed from the queue")]
+        [ToolFunction(Description = "Peek the oldest message in queue. The message is not removed from the queue. Returns the content of the message and without deleting the message from the queue. This method also can return errors while reading")]
         public async Task<ActionResponse> PeekMessageFromQueue(string queueName)
         {
             if (_serviceBusClient == null)

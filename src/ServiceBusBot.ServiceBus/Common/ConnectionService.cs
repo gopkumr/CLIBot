@@ -15,7 +15,7 @@ namespace ServiceBusBot.ServiceBus.Common
                 ExcludeInteractiveBrowserCredential = false,
             };
 
-            return new (fullyQualifiedNamespace, new DefaultAzureCredential(credentialOption));
+            return new(fullyQualifiedNamespace, new DefaultAzureCredential(credentialOption));
         }
 
         public static ServiceBusAdministrationClient ConnectAdminClient(string? namespaceName)

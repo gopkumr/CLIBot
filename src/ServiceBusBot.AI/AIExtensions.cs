@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.AI.Inference;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
@@ -26,7 +27,8 @@ namespace ServiceBusBot.AI
             var tools = services.ScanAndExtractToolFunctions();
             var chatService = configuration["AI:Service"] switch
             {
-                "AzureOpenAI" => BuildAzureAIServices(tools, configuration["AzureOpenAI:Endpoint"]!, configuration["AI:ModelId"]!, configuration["AzureOpenAI:ApiKey"]!),
+                "AzureOpenAI" => BuildAzureOpenAIServices(tools, configuration["AzureOpenAI:Endpoint"]!, configuration["AI:ModelId"]!, configuration["AzureOpenAI:ApiKey"]!),
+                "AzureAI" => BuildAzureAIServices(tools, configuration["AzureAI:Endpoint"]!, configuration["AI:ModelId"]!, configuration["AzureAI:ApiKey"]!),
                 "Ollama" => BuildOllamaAIServices(tools, configuration["AI:ModelId"]!),
                 _ => throw new ArgumentException("Invalid AI service specified in configuration.")
             };
@@ -36,9 +38,9 @@ namespace ServiceBusBot.AI
         private static IChatService BuildOllamaAIServices(IEnumerable<AITool> tools, string modelId) =>
             ChatServiceBuilder.Initialise(new OllamaChatClient(ollamaEndpoint, modelId).AsBuilder())
                               .AddFunctionCalling()
-                              .Build(tools);
+                              .Build(tools, ChatToolMode.RequireAny);
 
-        private static IChatService BuildAzureAIServices(IEnumerable<AITool> tools, string endpoint, string modelId, string? apiKey = null)
+        private static IChatService BuildAzureOpenAIServices(IEnumerable<AITool> tools, string endpoint, string modelId, string? apiKey = null)
         {
             var azOpenAIClient = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
             if (apiKey != null)
@@ -48,7 +50,20 @@ namespace ServiceBusBot.AI
 
             return ChatServiceBuilder.Initialise(azOpenAIClient.AsChatClient(modelId).AsBuilder())
                                      .AddFunctionCalling()
-                                     .Build(tools);
+                                     .Build(tools, ChatToolMode.RequireAny);
+        }
+
+        private static IChatService BuildAzureAIServices(IEnumerable<AITool> tools, string endpoint, string modelId, string? apiKey = null)
+        {
+            var azAIClient = new ChatCompletionsClient(new Uri(endpoint), new DefaultAzureCredential());
+            if (apiKey != null)
+            {
+                azAIClient = new ChatCompletionsClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
+            }
+
+            return ChatServiceBuilder.Initialise(azAIClient.AsChatClient(modelId).AsBuilder())
+                                     .AddFunctionCalling()
+                                     .Build(tools, ChatToolMode.Auto);
         }
     }
 }

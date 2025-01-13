@@ -13,7 +13,7 @@ namespace ServiceBusBot.CLI
                 new SelectionPrompt<string>()
                     .Title("What AI Service you want to use?")
                     .AddChoices(new[] {
-            "Ollama", "AzureOpenAI"
+            "Ollama", "AzureOpenAI", "AzureAI"
                     }));
 
             var modelId = AnsiConsole.Prompt(
@@ -22,30 +22,29 @@ namespace ServiceBusBot.CLI
             configDictionary.Add("AI:Service", aiService);
             configDictionary.Add("AI:ModelId", modelId);
 
-            if (aiService == "AzureOpenAI")
+            if (aiService == "AzureOpenAI" || aiService == "AzureAI")
             {
+                var configPrefix = aiService == "AzureOpenAI" ? "AzureOpenAI" : "AzureAI";
                 var azureOpenAIEndpoint = AnsiConsole.Prompt(
-                        new TextPrompt<string>("What's the endpoint of the Azure OpenAI service?"));
+                        new TextPrompt<string>($"What's the endpoint of the {configPrefix} service?"));
 
-                configDictionary.Add("AzureOpenAI:Endpoint", azureOpenAIEndpoint);
-                configDictionary.Add("AzureOpenAI:AuthMethod", "Identity");
+                configDictionary.Add($"{configPrefix}:Endpoint", azureOpenAIEndpoint);
+                configDictionary.Add($"{configPrefix}:AuthMethod", "Identity");
 
                 var apiKeyOption = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("You want to use API Key to connect?")
-                        .AddChoices(new[] {
-                "yes", "no"
-                        }));
+                        .AddChoices(["Yes", "No"]));
 
 
-                if (apiKeyOption == "yes")
+                if (apiKeyOption.ToLower() == "yes")
                 {
-                    configDictionary["AzureOpenAI:AuthMethod"] = "APIKey";
+                    configDictionary[$"{configPrefix}:AuthMethod"] = "APIKey";
                     var azureOpenAIKey = AnsiConsole.Prompt(
-                        new TextPrompt<string>("What's the API Key for the Azure OpenAI service?").
+                        new TextPrompt<string>($"What's the API Key for the {configPrefix} service?").
                         Secret('-'));
 
-                    configDictionary.Add("AzureOpenAI:APIKey", azureOpenAIKey);
+                    configDictionary.Add($"{configPrefix}:APIKey", azureOpenAIKey);
                 }
             }
             return configDictionary;
@@ -99,12 +98,12 @@ namespace ServiceBusBot.CLI
 
         public static void AddBotResponseRowToTable(Table table, string message, string? response)
         {
-            table.AddRow($"[green]You:[/] {message}", $"[red]Bot:[/] {response.Replace("[","{").Replace("]","}")}");
+            table.AddRow($"[green]You:[/] {message}", $"[red]Bot:[/] {(response ?? "None").Replace("[", "{").Replace("]", "}")}");
         }
 
-        public static void AddUsageRowToTable(Table table, string? duration, int? token)
+        public static void AddUsageRowToTable(Table table, int? token)
         {
-            table.AddRow($"", $"[red]usage:[/] Total Duration: {duration??""}, Total Token: {token?.ToString()??""}");
+            table.AddRow($"", $"[red] Total Token:[/] {token?.ToString() ?? ""}");
         }
 
         public static void RerenderTable(Table table)
