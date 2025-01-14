@@ -4,15 +4,21 @@ using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.Domain.Attributes;
 using ServiceBusBot.Domain.Model;
 using ServiceBusBot.ServiceBus.Common;
+using ServiceBusBot.ServiceBus.Contracts;
 using ServiceBusBot.ServiceBus.Namespace;
 using ServiceBusBot.ServiceBus.Queue;
 
 namespace ServiceBusBot.ServiceBus
 {
-    public class ServiceBusOrchastrator : IAsyncDisposable, ITool
+    public class ServiceBusOrchastrator : IAsyncDisposable, ITool, IServiceBusOrchastrator
     {
         ServiceBusClient? _serviceBusClient;
         ServiceBusAdministrationClient? _serviceBusAdminClient;
+
+        public ServiceBusOrchastrator()
+        {
+            
+        }
 
         [ToolFunction(Description = "Connect to a service bus namespace for the passed name")]
         public async Task<ActionResponse> Connect(string namespaceName)
@@ -129,7 +135,7 @@ namespace ServiceBusBot.ServiceBus
             }
         }
 
-        [ToolFunction(Description = "Peek the oldest message in queue. The message is not removed from the queue. Returns the content of the message and without deleting the message from the queue. This method also can return errors while reading")]
+        [ToolFunction(Description = "Peek the oldest message in queue. The message is not removed from the queue.", ReturnDescription="Returns the content of the message and without deleting the message from the queue. This method also can return errors while reading")]
         public async Task<ActionResponse> PeekMessageFromQueue(string queueName)
         {
             if (_serviceBusClient == null)
@@ -137,7 +143,7 @@ namespace ServiceBusBot.ServiceBus
 
             try
             {
-                return await QueueService.PeekMessageFromQueue(_serviceBusClient, queueName);
+                return await QueueService.PeekMessagesFromQueue(_serviceBusClient, queueName);
             }
             catch (Exception ex)
             {

@@ -45,7 +45,6 @@ namespace ServiceBusBot.AI.Services
             conversation.Add(new ChatMessage(ChatRole.Assistant, response.Message.Text));
 
             return new ModelResponse(response?.Message?.Text ?? string.Empty,
-                                    TimeSpan.Parse(response?.AdditionalProperties?["total_duration"]?.ToString() ?? TimeSpan.MinValue.ToString()),
                                     response?.Usage?.TotalTokenCount ?? 000);
         }
 

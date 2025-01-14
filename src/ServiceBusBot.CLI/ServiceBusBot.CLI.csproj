@@ -12,7 +12,7 @@
   </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ServiceBusBot.AI\ServiceBusBot.AI.csproj" />
+      <ProjectReference Include="..\ServiceBusBot.Agents\ServiceBusBot.Agents.csproj" />
     </ItemGroup>
 
   <PropertyGroup>

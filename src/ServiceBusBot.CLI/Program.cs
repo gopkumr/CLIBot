@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ServiceBusBot.AI;
+using ServiceBusBot.Agents;
 using ServiceBusBot.CLI;
 using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.ServiceBus;
