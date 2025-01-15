@@ -74,9 +74,9 @@ namespace ServiceBusBot.CLI
             Console.WriteLine("");
         }
 
-        public static async Task<ModelResponse?> GetModelResponse(IChatService chatService, string message)
+        public static async Task<IEnumerable<ModelResponse>?> GetModelResponse(IChatService chatService, string message)
         {
-            ModelResponse? response = null;
+            IEnumerable<ModelResponse>? response = null;
             await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots2)
                 .StartAsync("Thinking...", async ctx =>
@@ -96,9 +96,9 @@ namespace ServiceBusBot.CLI
                 .AddColumn("");
         }
 
-        public static void AddBotResponseRowToTable(Table table, string message, string? response)
+        public static void AddBotResponseRowToTable(Table table, string message, string? response, string? agentNames)
         {
-            table.AddRow($"[green]You:[/] {message}", $"[red]Bot:[/] {(response ?? "None").Replace("[", "{").Replace("]", "}")}");
+            table.AddRow($"[green]You:[/] {message}", $"[red]{agentNames??"Agents"}:[/] {(response ?? "None").Replace("[", "{").Replace("]", "}")}");
         }
 
         public static void AddUsageRowToTable(Table table, int? token)

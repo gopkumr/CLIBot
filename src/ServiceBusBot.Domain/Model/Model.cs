@@ -2,5 +2,5 @@
 {
 
     public record ActionResponse(string Message, bool Success);
-    public record ModelResponse(string Message, int TokenUsage);
+    public record ModelResponse(string Message, int TokenUsage, string Name = "");
 }

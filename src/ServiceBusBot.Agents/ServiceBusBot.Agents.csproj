@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ServiceBusBot.Domain\ServiceBusBot.Domain.csproj" />
     <ProjectReference Include="..\ServiceBusBot.ServiceBus\ServiceBusBot.ServiceBus.csproj" />
+    <ProjectReference Include="..\ServiceBusBot.Storage\ServiceBusBot.Storage.csproj" />
   </ItemGroup>
 
 </Project>

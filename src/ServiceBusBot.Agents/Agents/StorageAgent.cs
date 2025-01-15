@@ -7,21 +7,21 @@ using ServiceBusBot.Domain.Abstrations;
 namespace ServiceBusBot.Agents.Agents
 {
 #pragma warning disable SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-    public class ServicebusAgent: IAgent
+    public class StorageAgent: IAgent
     {
         readonly string[] _systemPrompts = [
-            "You are a helpful AI assistant helping with operations on Azure Servicebus. Execute the part in the request that you can perform using the function and If the requested operation or part of the operation is not found in the functions list, please respond with a message with a request for other agents to perform it.",
+            "You are a helpful AI assistant helping with operations on differnt types of storage including file system. Execute the part in the request that you can perform using the function and If the requested operation or part of the operation is not found in the functions list, please respond with a request for other agents to perform it.",
             "Don't make assumptions about what values to use with functions. Ask for clarification if a user request is ambiguous."
         ];
-        private readonly ChatCompletionAgent _servicebusAgent;
+        private readonly ChatCompletionAgent _storageAgent;
 
-        public ServicebusAgent(IConfiguration configuration,[FromKeyedServices("ServicebusPlugin")] IEnumerable<IPlugin> plugins)
+        public StorageAgent(IConfiguration configuration, [FromKeyedServices("StoragePlugin")] IEnumerable<IPlugin> plugins)
         {
-            _servicebusAgent = AssistantAgentFactory.ChatAgent("ServicebusAssistant", string.Join(',', _systemPrompts), configuration, plugins);
+            _storageAgent = AssistantAgentFactory.ChatAgent("StorageAssistant", string.Join(',', _systemPrompts), configuration, plugins);
         }
 
         //TODO: Replace and Expose agent method abstractions here
-        public ChatCompletionAgent Agent => _servicebusAgent;
+        public ChatCompletionAgent Agent => _storageAgent;
     }
 
 #pragma warning restore SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

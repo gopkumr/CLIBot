@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusBot.Domain", "Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusBot.ServiceBus", "ServiceBusBot.ServiceBus\ServiceBusBot.ServiceBus.csproj", "{DF386994-E96B-472B-9B4E-C5A2F1C3FAC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusBot.AI", "ServiceBusBot.AI\ServiceBusBot.AI.csproj", "{F2EE6F94-2220-47F9-9213-33EC1AA99692}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusBot.Storage", "ServiceBusBot.Storage\ServiceBusBot.Storage.csproj", "{9F5460E5-89FD-4ABB-968A-2B4C198E0D75}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusBot.Agents", "ServiceBusBot.Agents\ServiceBusBot.Agents.csproj", "{E16F13C9-A1FB-448B-825E-3DA777E0CFC5}"

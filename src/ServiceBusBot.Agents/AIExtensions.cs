@@ -11,8 +11,10 @@ namespace ServiceBusBot.Agents
     {
         public static IServiceCollection RegisterAIServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IPlugin,ServiceBusPlugin>();
+            services.AddKeyedSingleton<IPlugin,ServiceBusPlugin>("ServicebusPlugin");
+            services.AddKeyedSingleton<IPlugin, StoragePlugin>("StoragePlugin");
             services.AddSingleton<ServicebusAgent>();
+            services.AddSingleton<StorageAgent>();
             services.AddSingleton<IChatService, ChatService>();
             return services;
         }

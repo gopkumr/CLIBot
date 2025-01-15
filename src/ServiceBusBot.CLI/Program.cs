@@ -5,6 +5,7 @@ using ServiceBusBot.Agents;
 using ServiceBusBot.CLI;
 using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.ServiceBus;
+using ServiceBusBot.Storage;
 
 var configDictionary = CliHelper.GetConfigurationFromUser();
 
@@ -16,6 +17,7 @@ var serviceProvider = new ServiceCollection()
    .AddSingleton<IConfiguration>(config)
    .AddLogging(builder => builder.AddConsole().AddFilter((level) => level == LogLevel.Information))
    .RegisterServiceBusTools()
+   .RegisterStorageTools()
    .RegisterAIServices(config)
    .BuildServiceProvider();
 
@@ -30,8 +32,16 @@ while (message != "exit" && !string.IsNullOrEmpty(message))
 {
     var response = await CliHelper.GetModelResponse(chatService, message);
     CliHelper.RenderHeader();
-    CliHelper.AddBotResponseRowToTable(table, message, response?.Message);
-    CliHelper.AddUsageRowToTable(table, response?.TokenUsage);
+    response?.ToList().ForEach((item) =>
+    {
+        var userMessage = message;
+        if (response?.ToList().IndexOf(item) > 0)
+            userMessage = "";
+
+        CliHelper.AddBotResponseRowToTable(table, userMessage, item.Message, item.Name);
+    });
+
+    //CliHelper.AddUsageRowToTable(table, response?.TokenUsage);
     CliHelper.RerenderTable(table);
 
     message = message = CliHelper.PromptUserMessage();

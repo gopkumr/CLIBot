@@ -4,6 +4,6 @@ namespace ServiceBusBot.Domain.Abstrations
 {
     public interface IChatService
     {
-        Task<ModelResponse?> GetResponseAsync(string message);
+        Task<IEnumerable<ModelResponse>?> GetResponseAsync(string message);
     }
 }

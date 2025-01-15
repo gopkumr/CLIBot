@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ServiceBusBot.Domain.Abstrations;
 
 namespace ServiceBusBot.Agents.Extensions
@@ -18,7 +20,12 @@ namespace ServiceBusBot.Agents.Extensions
                             .Init()
                             .WithConfiguredModel(configuration)
                             .WithPlugins(plugins)
-                            .Build()
+                            .Build(),
+                Arguments = new KernelArguments(
+                    new OpenAIPromptExecutionSettings()
+                    {
+                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+                    })
             };
         }
     }

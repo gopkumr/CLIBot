@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ServiceBusBot.Agents\ServiceBusBot.Agents.csproj" />
+      <ProjectReference Include="..\ServiceBusBot.Storage\ServiceBusBot.Storage.csproj" />
     </ItemGroup>
 
   <PropertyGroup>
