@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.Agents;
 using ServiceBusBot.Agents.Extensions;
 using ServiceBusBot.Domain.Abstrations;
+using ServiceBusBot.Domain.Model;
 
 namespace ServiceBusBot.Agents.Agents
 {
@@ -15,9 +17,9 @@ namespace ServiceBusBot.Agents.Agents
         ];
         private readonly ChatCompletionAgent _storageAgent;
 
-        public StorageAgent(IConfiguration configuration, [FromKeyedServices("StoragePlugin")] IEnumerable<IPlugin> plugins)
+        public StorageAgent(IOptions<AISettings> configuration, [FromKeyedServices("StoragePlugin")] IEnumerable<IPlugin> plugins)
         {
-            _storageAgent = AssistantAgentFactory.ChatAgent("StorageAssistant", string.Join(',', _systemPrompts), configuration, plugins);
+            _storageAgent = AssistantAgentFactory.ChatAgent("StorageAssistant", string.Join(',', _systemPrompts), configuration?.Value.StorageAgentSettings!, plugins, configuration?.Value.AzureAIFoundryConnectionString);
         }
 
         //TODO: Replace and Expose agent method abstractions here

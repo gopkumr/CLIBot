@@ -3,6 +3,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ServiceBusBot.Domain.Abstrations;
+using ServiceBusBot.Domain.Model;
 
 namespace ServiceBusBot.Agents.Extensions
 {
@@ -10,14 +11,14 @@ namespace ServiceBusBot.Agents.Extensions
 
     internal static class AssistantAgentFactory
     {
-        public static ChatCompletionAgent ChatAgent(string name, string systemPrompt, IConfiguration configuration, IEnumerable<IPlugin>? plugins=null)
+        public static ChatCompletionAgent ChatAgent(string name, string systemPrompt, AgentSettings configuration, IEnumerable<IPlugin>? plugins=null, string? aiFoundryConnectionString=null)
         {
             return new ChatCompletionAgent
             {
-                Name = name,
+                Name = $"{name}-{configuration.ModelId}",
                 Instructions = systemPrompt,
                 Kernel = KernelBuilder
-                            .Init()
+                            .Init(aiFoundryConnectionString)
                             .WithConfiguredModel(configuration)
                             .WithPlugins(plugins)
                             .Build(),

@@ -4,17 +4,18 @@ using Microsoft.Extensions.Logging;
 using ServiceBusBot.Agents;
 using ServiceBusBot.CLI;
 using ServiceBusBot.Domain.Abstrations;
+using ServiceBusBot.Domain.Model;
 using ServiceBusBot.ServiceBus;
 using ServiceBusBot.Storage;
-
-var configDictionary = CliHelper.GetConfigurationFromUser();
+using static OllamaSharp.OllamaApiClient;
 
 IConfigurationRoot config = new ConfigurationBuilder()
-    .AddInMemoryCollection(configDictionary)
+    .AddJsonFile("appsettings.json")
     .Build();
 
 var serviceProvider = new ServiceCollection()
    .AddSingleton<IConfiguration>(config)
+   .Configure<AISettings>(config.GetSection(AISettings.SectionName))
    .AddLogging(builder => builder.AddConsole().AddFilter((level) => level == LogLevel.Information))
    .RegisterServiceBusTools()
    .RegisterStorageTools()
