@@ -14,3 +14,4 @@ packages
 [Ll]ogs/
 .vscode/*
 .vs/*
+/src/ServiceBusBot.CLI/appsettings.json
