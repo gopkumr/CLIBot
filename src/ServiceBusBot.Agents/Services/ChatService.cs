@@ -51,11 +51,12 @@ namespace ServiceBusBot.Agents.Services
                 Participants can take more than one turn if the task is to perform same operation.
 
                 Choose only from these participants:
-                {{$participants}}
+                {{{servicebusAgent.Agent.Name}}} - Handles service bus namespace related operations
+                {{{storageAgent.Agent.Name}}} - Handles storage and files are related operations
 
                 Follow these rules when choosing the next participant:
-                - If the History is from the user, it is the one of the agents' turn.
-                - If the History is from an agent and there are no next steps, then the task is completed.
+                - If the History is from the user, it is agents' turn.
+                - If the History is from an agent and if task is not completed, then the next agent needs to give the task a try.
                 - If the History has tasks relates to storage and servicebus then split the task and orchastraate between the agents to complete.
                 - If the History is from an agent and the next step is to read or write from a storage service, it is {{{storageAgent.Agent.Name}}}'s turn so return the text without explanation: {{{storageAgent.Agent.Name}}}
                 - If the History is from an agent and the next step is to perform operations on a servicebus or servicebus namespace services like queues, topics or deadletters, it is {{{servicebusAgent.Agent.Name}}}'s turn so return the text without explanation: {{{servicebusAgent.Agent.Name}}} 

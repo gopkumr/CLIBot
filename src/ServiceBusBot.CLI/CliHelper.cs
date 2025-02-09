@@ -1,4 +1,5 @@
-﻿using ServiceBusBot.Domain.Abstrations;
+﻿using OllamaSharp.Models.Chat;
+using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.Domain.Model;
 using Spectre.Console;
 
@@ -30,17 +31,14 @@ namespace ServiceBusBot.CLI
             Console.WriteLine("");
         }
 
-        public static async Task<IEnumerable<ModelResponse>?> GetModelResponse(IChatService chatService, string message)
+        public static async Task ShowSpinnerAndCall(string message, Func<Task> modelTriggerFunction)
         {
-            IEnumerable<ModelResponse>? response = null;
-            await AnsiConsole.Status()
+           await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots2)
-                .StartAsync("Thinking...", async ctx =>
+                .StartAsync(message, async ctx =>
                 {
-                    response = await chatService.GetResponseAsync(message);
+                   await modelTriggerFunction();
                 });
-
-            return response;
         }
 
         public static Table CreateChatResponseTable()

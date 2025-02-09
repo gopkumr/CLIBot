@@ -15,9 +15,9 @@ namespace ServiceBusBot.Agents.Extensions
         {
             return new ChatCompletionAgent
             {
-                Name = $"{name}-{configuration.ModelId}",
+                Name = $"{name}",
                 Instructions = systemPrompt,
-                Kernel = KernelBuilder
+                Kernel =  KernelBuilder
                             .Init(aiFoundryConnectionString)
                             .WithConfiguredModel(configuration)
                             .WithPlugins(plugins)

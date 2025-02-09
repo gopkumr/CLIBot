@@ -15,17 +15,11 @@ namespace ServiceBusBot.Agents.Extensions
         private const string ollamaEndpoint = "http://localhost:11434/";
         private readonly AIProjectClient? _aiProjectClient = null;
 
-
         private KernelBuilder(string? aiFoundryConnectionString = null)
         {
             _builder = Kernel.CreateBuilder();
             if (aiFoundryConnectionString != null)
                 _aiProjectClient = new AIProjectClient(aiFoundryConnectionString!, new DefaultAzureCredential());
-        }
-
-        public static KernelBuilder Init()
-        {
-            return new KernelBuilder();
         }
 
         public static KernelBuilder Init(string? aiFoundryConnectionString = null)
@@ -43,10 +37,10 @@ namespace ServiceBusBot.Agents.Extensions
                     if (connections == null) throw new ArgumentException("Invalid configuration, missing AI Foundry project connection string.");
                     ConnectionResponse connection = connections.GetDefaultConnection(ConnectionType.AzureOpenAI, withCredential: true);
                     var properties = connection.Properties as ConnectionPropertiesApiKeyAuth;
-                    _builder = _builder.AddAzureOpenAIChatCompletion(configuration.ModelId, properties!.Target, properties!.Credentials.Key);
+                    _builder = _builder.AddAzureOpenAIChatCompletion(configuration.ModelId!, properties!.Target, properties!.Credentials.Key);
                     break;
                 case "Ollama":
-                    _builder = _builder.AddOllamaChatCompletion(configuration.ModelId, new Uri(ollamaEndpoint));
+                    _builder = _builder.AddOllamaChatCompletion(configuration.ModelId!, new Uri(ollamaEndpoint));
                     break;
                 case "AzureAI":
                     throw new ArgumentException("AzureAI service is not implemented yet.");

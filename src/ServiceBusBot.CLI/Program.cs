@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServiceBusBot.Agents;
@@ -7,22 +8,23 @@ using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.Domain.Model;
 using ServiceBusBot.ServiceBus;
 using ServiceBusBot.Storage;
-using static OllamaSharp.OllamaApiClient;
+
+Console.WriteLine("Initializing...");
 
 IConfigurationRoot config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
 var serviceProvider = new ServiceCollection()
-   .AddSingleton<IConfiguration>(config)
-   .Configure<AISettings>(config.GetSection(AISettings.SectionName))
-   .AddLogging(builder => builder.AddConsole().AddFilter((level) => level == LogLevel.Information))
-   .RegisterServiceBusTools()
-   .RegisterStorageTools()
-   .RegisterAIServices(config)
-   .BuildServiceProvider();
+                       .AddSingleton<IConfiguration>(config)
+                       .Configure<AISettings>(config.GetSection(AISettings.SectionName))
+                       .AddLogging(builder => builder.AddConsole().AddFilter((level) => level == LogLevel.Information))
+                       .RegisterServiceBusTools()
+                       .RegisterStorageTools()
+                       .RegisterAIServices(config)
+                       .BuildServiceProvider();
 
-var chatService = serviceProvider.GetRequiredService<IChatService>();
+var chatService = serviceProvider!.GetRequiredService<IChatService>();
 
 CliHelper.RenderHeader();
 
@@ -31,7 +33,12 @@ string message = CliHelper.PromptUserMessage();
 
 while (message != "exit" && !string.IsNullOrEmpty(message))
 {
-    var response = await CliHelper.GetModelResponse(chatService, message);
+    IEnumerable<ModelResponse>? response = null;
+    await CliHelper.ShowSpinnerAndCall("Thinking...", async () =>
+    {
+        response = await chatService.GetResponseAsync(message);
+    });
+
     CliHelper.RenderHeader();
     response?.ToList().ForEach((item) =>
     {
@@ -42,7 +49,6 @@ while (message != "exit" && !string.IsNullOrEmpty(message))
         CliHelper.AddBotResponseRowToTable(table, userMessage, item.Message, item.Name);
     });
 
-    //CliHelper.AddUsageRowToTable(table, response?.TokenUsage);
     CliHelper.RerenderTable(table);
 
     message = message = CliHelper.PromptUserMessage();
