@@ -35,7 +35,7 @@ namespace ServiceBusBot.CLI
         {
            await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots2)
-                .StartAsync(message, async ctx =>
+                .StartAsync(message+"\n", async ctx =>
                 {
                    await modelTriggerFunction();
                 });

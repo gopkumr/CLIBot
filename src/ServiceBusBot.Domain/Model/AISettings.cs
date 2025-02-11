@@ -13,6 +13,7 @@ public record AISettings
     public string? AzureAIFoundryConnectionString { get; set; }
     public AgentSettings? ServicebusAgentSettings { get; set; }
     public AgentSettings? StorageAgentSettings { get; set; }
+    public AgentSettings? CoordinatorAgentSettings { get; set; }
 }
 
 public record AgentSettings {

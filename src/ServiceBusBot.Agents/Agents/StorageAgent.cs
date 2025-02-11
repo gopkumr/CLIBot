@@ -12,8 +12,10 @@ namespace ServiceBusBot.Agents.Agents
     public class StorageAgent: IAgent
     {
         readonly string[] _systemPrompts = [
-            "You are a helpful AI assistant helping with operations on differnt types of storage including file system. Execute the part in the request that you can perform using the function and If the requested operation or part of the operation is not found in the functions list, please respond with a request for other agents to perform it.",
-            "Don't make assumptions about what values to use with functions. Ask for clarification if a user request is ambiguous."
+            "You are a helpful AI assistant helping with operations on differnt types of storage including file system. Execute the part in the request that you can perform using the function and If the requested operation or part of the operation is not found in the functions list, please respond an appropriate message.",
+            "Don't make assumptions about what values to use with functions.",
+            "Once the task is successfully completed, respond with a success message and do not ask the user any further instructions",
+            "If the user query contains instructions that you cannot perform, instruct the Servicebus Assistant to perform it."
         ];
         private readonly ChatCompletionAgent _storageAgent;
 

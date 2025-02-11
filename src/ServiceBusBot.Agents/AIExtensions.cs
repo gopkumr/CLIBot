@@ -15,6 +15,7 @@ namespace ServiceBusBot.Agents
             services.AddKeyedSingleton<IPlugin, StoragePlugin>("StoragePlugin");
             services.AddSingleton<ServicebusAgent>();
             services.AddSingleton<StorageAgent>();
+            services.AddSingleton<CoordinatorAgent>();
             services.AddSingleton<IChatService, ChatService>();
             return services;
         }

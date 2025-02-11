@@ -1,5 +1,4 @@
-﻿
-using Microsoft.SemanticKernel;
+﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.Agents.History;
@@ -8,9 +7,14 @@ using ServiceBusBot.Agents.Agents;
 using ServiceBusBot.Domain.Abstrations;
 using ServiceBusBot.Domain.Model;
 using System.Text;
+using System.Text.Json;
 
 namespace ServiceBusBot.Agents.Services
 {
+
+    record SelectionResponse(string name, string reason);
+    record TerminationResponse(bool isAnswered, string reason);
+
 #pragma warning disable SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -18,11 +22,11 @@ namespace ServiceBusBot.Agents.Services
     {
         private readonly AgentGroupChat _agentGroupChat = new();
 
-        public ChatService(ServicebusAgent servicebusAgent, StorageAgent storageAgent)
+        public ChatService(ServicebusAgent servicebusAgent, StorageAgent storageAgent, CoordinatorAgent coordinatorAgent)
         {
             _agentGroupChat.AddAgent(servicebusAgent.Agent);
             _agentGroupChat.AddAgent(storageAgent.Agent);
-            _agentGroupChat.ExecutionSettings = new AgentGroupChatSettings { SelectionStrategy = CreateSelectionStrategy(servicebusAgent, storageAgent), TerminationStrategy= CreateTerminationStrategy(servicebusAgent) };
+            _agentGroupChat.ExecutionSettings = new AgentGroupChatSettings { SelectionStrategy = CreateSelectionStrategy(servicebusAgent, storageAgent, coordinatorAgent), TerminationStrategy= CreateTerminationStrategy(coordinatorAgent) };
         }
 
         public async Task<IEnumerable<ModelResponse>?> GetResponseAsync(string message)
@@ -42,24 +46,28 @@ namespace ServiceBusBot.Agents.Services
             return modelResponses;
         }
 
-        private static KernelFunctionSelectionStrategy CreateSelectionStrategy(ServicebusAgent servicebusAgent, StorageAgent storageAgent)
+        private static KernelFunctionSelectionStrategy CreateSelectionStrategy(ServicebusAgent servicebusAgent, StorageAgent storageAgent, CoordinatorAgent coordinatorAgent)
         {
             KernelFunction selectionFunction =
             AgentGroupChat.CreatePromptFunctionForStrategy(
                 $$$"""
-                Determine which participant takes the next turn in a conversation based on History.
-                Participants can take more than one turn if the task is to perform same operation.
+                Select which participant will take the next turn based on the conversation history.
 
-                Choose only from these participants:
-                {{{servicebusAgent.Agent.Name}}} - Handles service bus namespace related operations
-                {{{storageAgent.Agent.Name}}} - Handles storage and files are related operations
+                Only choose from these participants:
+                - ServicebusAssistant
+                - StorageAssistant
+                
+                Choose the next participant according to the action of the most recent participant:
+                If the query contains multiple tasks, split them and identify the first task to be done completed and select the agent based on it.
+                If the query involves Service Bus operations, select the ServiceBus Assistant.
+                If the query involves Storage operations, select the Storage Assistant.
+                Once all agents complete their tasks, respond with a single word: Done. Do not provide any additional explanations or details.
 
-                Follow these rules when choosing the next participant:
-                - If the History is from the user, it is agents' turn.
-                - If the History is from an agent and if task is not completed, then the next agent needs to give the task a try.
-                - If the History has tasks relates to storage and servicebus then split the task and orchastraate between the agents to complete.
-                - If the History is from an agent and the next step is to read or write from a storage service, it is {{{storageAgent.Agent.Name}}}'s turn so return the text without explanation: {{{storageAgent.Agent.Name}}}
-                - If the History is from an agent and the next step is to perform operations on a servicebus or servicebus namespace services like queues, topics or deadletters, it is {{{servicebusAgent.Agent.Name}}}'s turn so return the text without explanation: {{{servicebusAgent.Agent.Name}}} 
+                Respond in JSON format.  The JSON schema can include only:
+                {
+                    "name": "string (the name of the assistant selected for the next turn)",
+                    "reason": "string (the reason for the participant was selected)"
+                }
 
                 History:
                 {{$history}}
@@ -67,38 +75,54 @@ namespace ServiceBusBot.Agents.Services
                 safeParameterNames: ["history", "participants"]);
 
             KernelFunctionSelectionStrategy selectionStrategy =
-              new(selectionFunction, servicebusAgent.Agent.Kernel.Clone())
+              new(selectionFunction, coordinatorAgent.Agent.Kernel.Clone())
               {
                   HistoryVariableName = "history",
                   HistoryReducer = new ChatHistoryTruncationReducer(1),
                   AgentsVariableName = "participants",
-                  ResultParser = (result) => result.GetValue<string>() ?? servicebusAgent.Agent.Name ?? "ServicebusAgent"
+                  ResultParser = (result) => {
+                      var textData = (result.GetValue<string>()??string.Empty).Replace("```json", "").Replace("```", "");
+                      var jsonData = JsonSerializer.Deserialize<SelectionResponse>(textData);
+                      Console.WriteLine($"{jsonData?.reason ?? ""}");
+                      return jsonData?.name ?? "ServicebusAgent";
+                    }
               };
             return selectionStrategy;
         }
 
-        private static TerminationStrategy CreateTerminationStrategy(ServicebusAgent servicebusAgent)
+        private static TerminationStrategy CreateTerminationStrategy(CoordinatorAgent coordinatorAgent)
         {
             KernelFunction terminationFunction =
                 AgentGroupChat.CreatePromptFunctionForStrategy(
                 $$$"""
                 Examine the History and determine whether the task has been completed successfully.
-                If task has been completed successfully, respond with a single word with explanation: DONE.
-                If specific tasks are not completed and the agent requires further action to be done by another agent then continue the chat and respond with single word with explanation NOTCOMPLETED.
-                If no more actions needs to be done or agent wants inforation from user, respond with a single word with explanation: DONE.
+                If task has been completed successfully, respond with answered as true.
+                If specific tasks are not completed and the agent requires further action to be done by another agent then continue the chat and respond with not answered.
                 
+                Respond in JSON format.  The JSON schema can include only:
+                {
+                    "isAnswered": "bool (true if the user request has been fully answered)",
+                    "reason": "string (the reason for your determination)"
+                }
+
                 History:
                 {{$history}}
                 """,
               safeParameterNames: "history");
 
             TerminationStrategy terminationStrategy =
-                      new KernelFunctionTerminationStrategy(terminationFunction, servicebusAgent.Agent.Kernel.Clone())
+                      new KernelFunctionTerminationStrategy(terminationFunction, coordinatorAgent.Agent.Kernel.Clone())
                       {
                           HistoryReducer = new ChatHistoryTruncationReducer(1),
                           HistoryVariableName = "history",
-                          MaximumIterations = 2,
-                          ResultParser = (result) => result.GetValue<string>()?.Contains("DONE", StringComparison.OrdinalIgnoreCase) ?? false
+                          MaximumIterations = 4,
+                          ResultParser = (result) =>
+                          {
+                              var textData = (result.GetValue<string>() ?? string.Empty).Replace("```json", "").Replace("```", "");
+                              var jsonData = JsonSerializer.Deserialize<TerminationResponse>(textData);
+                              Console.WriteLine($"{jsonData?.reason??""}");
+                              return jsonData?.isAnswered ?? false;
+                          }
                       };
             return terminationStrategy;
         }
