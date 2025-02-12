@@ -10,5 +10,7 @@ namespace ServiceBusBot.Storage.Contract
     public  interface IStorageOrchastrator
     {
         ActionResponse ReadFileContentFromPath(string path);
+
+        ActionResponse WriteContentToPath(string path, string? content);
     }
 }

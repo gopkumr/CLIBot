@@ -11,7 +11,6 @@ using System.Text.Json;
 
 namespace ServiceBusBot.Agents.Services
 {
-
     record SelectionResponse(string name, string reason);
     record TerminationResponse(bool isAnswered, string reason);
 

@@ -18,5 +18,18 @@ namespace ServiceBusBot.Storage
                 return new ActionResponse(ex.Message, false);
             }
         }
+
+        public ActionResponse WriteContentToPath(string path, string? content)
+        {
+            try
+            {
+                var success = FileService.WriteContentToPath(path, content);
+                return new ActionResponse("Content written successfully", success);
+            }
+            catch (Exception ex)
+            {
+                return new ActionResponse(ex.Message, false);
+            }
+        }
     }
 }

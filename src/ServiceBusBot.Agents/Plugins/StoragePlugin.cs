@@ -23,6 +23,13 @@ namespace ServiceBusBot.Agents.Plugins
             return _storageTool.ReadFileContentFromPath(path);
         }
 
+        [KernelFunction("write_content_to_file_at_path")]
+        [Description("Write content inti a file using the full path sent")]
+        [return: Description("Status of the file write operation")]
+        public ActionResponse WriteContentToPath(string path, string? content)
+        {
+            return _storageTool.WriteContentToPath(path, content);
+        }
 
     }
 }
